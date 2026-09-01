@@ -33,10 +33,14 @@ def test_normalize_version_rejects_invalid_tags(invalid: str) -> None:
 
 
 def test_set_manifest_version(tmp_path: Path) -> None:
-    """Test manifest synchronization."""
+    """Test manifest synchronization without changing its domain."""
     manifest = tmp_path / "manifest.json"
-    manifest.write_text('{"domain":"mopeka","version":"0.0.0"}', encoding="utf-8")
+    manifest.write_text(
+        '{"domain":"mopeka_quality","version":"0.0.0"}', encoding="utf-8"
+    )
 
     set_manifest_version(manifest, "2.4.6")
 
-    assert json.loads(manifest.read_text(encoding="utf-8"))["version"] == "2.4.6"
+    data = json.loads(manifest.read_text(encoding="utf-8"))
+    assert data["domain"] == "mopeka_quality"
+    assert data["version"] == "2.4.6"
