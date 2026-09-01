@@ -4,8 +4,8 @@ from mopeka_iot_ble import DeviceKey, MopekaIOTBluetoothDeviceData
 
 from homeassistant.helpers.service_info.bluetooth import BluetoothServiceInfo
 
-from custom_components.mopeka.device import device_key_to_bluetooth_entity_key
-from custom_components.mopeka.sensor import (
+from custom_components.mopeka_quality.device import device_key_to_bluetooth_entity_key
+from custom_components.mopeka_quality.sensor import (
     QUALITY_SENSOR_KEY,
     _value_is_accepted,
     sensor_update_to_bluetooth_data_update,
@@ -69,15 +69,9 @@ def test_converter_rejects_low_quality_values() -> None:
 
     converted = sensor_update_to_bluetooth_data_update(update, required_quality=100)
 
-    tank_key = device_key_to_bluetooth_entity_key(
-        DeviceKey(key="tank_level", device_id=None)
-    )
-    temp_key = device_key_to_bluetooth_entity_key(
-        DeviceKey(key="temperature", device_id=None)
-    )
-    quality_key = device_key_to_bluetooth_entity_key(
-        DeviceKey(key="reading_quality", device_id=None)
-    )
+    tank_key = device_key_to_bluetooth_entity_key(DeviceKey(key="tank_level", device_id=None))
+    temp_key = device_key_to_bluetooth_entity_key(DeviceKey(key="temperature", device_id=None))
+    quality_key = device_key_to_bluetooth_entity_key(DeviceKey(key="reading_quality", device_id=None))
     assert converted.entity_data[tank_key] is None
     assert converted.entity_data[temp_key] is None
     assert converted.entity_data[quality_key] == 33
@@ -90,15 +84,9 @@ def test_converter_accepts_good_quality_values() -> None:
 
     converted = sensor_update_to_bluetooth_data_update(update, required_quality=100)
 
-    tank_key = device_key_to_bluetooth_entity_key(
-        DeviceKey(key="tank_level", device_id=None)
-    )
-    temp_key = device_key_to_bluetooth_entity_key(
-        DeviceKey(key="temperature", device_id=None)
-    )
-    quality_key = device_key_to_bluetooth_entity_key(
-        DeviceKey(key="reading_quality", device_id=None)
-    )
+    tank_key = device_key_to_bluetooth_entity_key(DeviceKey(key="tank_level", device_id=None))
+    temp_key = device_key_to_bluetooth_entity_key(DeviceKey(key="temperature", device_id=None))
+    quality_key = device_key_to_bluetooth_entity_key(DeviceKey(key="reading_quality", device_id=None))
     assert converted.entity_data[tank_key] == 341
     assert converted.entity_data[temp_key] == 27
     assert converted.entity_data[quality_key] == 100

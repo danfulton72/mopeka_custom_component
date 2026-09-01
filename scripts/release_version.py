@@ -30,10 +30,7 @@ def set_manifest_version(manifest_path: Path, version: str) -> None:
     normalize_version(version)
     data = json.loads(manifest_path.read_text(encoding="utf-8"))
     data["version"] = version.removeprefix("v")
-    manifest_path.write_text(
-        json.dumps(data, indent=2) + "\n",
-        encoding="utf-8",
-    )
+    manifest_path.write_text(json.dumps(data, indent=2) + "\n", encoding="utf-8")
 
 
 def main() -> None:
@@ -43,7 +40,7 @@ def main() -> None:
     parser.add_argument(
         "--manifest",
         type=Path,
-        default=Path("custom_components/mopeka/manifest.json"),
+        default=Path("custom_components/mopeka_quality/manifest.json"),
     )
     args = parser.parse_args()
 

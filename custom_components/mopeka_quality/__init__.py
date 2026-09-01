@@ -1,4 +1,4 @@
-"""The Mopeka custom integration."""
+"""The Mopeka Quality custom integration."""
 
 # Adapted from Home Assistant Core; modified for HACS and quality filtering.
 
@@ -7,19 +7,12 @@ import logging
 from mopeka_iot_ble import MediumType, MopekaIOTBluetoothDeviceData
 
 from homeassistant.components.bluetooth import BluetoothScanningMode
-from homeassistant.components.bluetooth.passive_update_processor import (
-    PassiveBluetoothProcessorCoordinator,
-)
+from homeassistant.components.bluetooth.passive_update_processor import PassiveBluetoothProcessorCoordinator
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 
-from .const import (
-    CONF_MEDIUM_TYPE,
-    CONF_REQUIRED_QUALITY,
-    DEFAULT_MEDIUM_TYPE,
-    DEFAULT_REQUIRED_QUALITY,
-)
+from .const import CONF_MEDIUM_TYPE, DEFAULT_MEDIUM_TYPE
 
 PLATFORMS: list[Platform] = [Platform.SENSOR]
 
@@ -52,18 +45,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: MopekaConfigEntry) -> bo
     return True
 
 
-async def async_migrate_entry(
-    hass: HomeAssistant, entry: MopekaConfigEntry
-) -> bool:
-    """Migrate an existing Core/older custom Mopeka config entry."""
+async def async_migrate_entry(hass: HomeAssistant, entry: MopekaConfigEntry) -> bool:
+    """Migrate an older Mopeka Quality config entry."""
     if entry.version > 2:
         _LOGGER.error(
-            "Cannot migrate Mopeka config entry from unsupported version %s",
+            "Cannot migrate Mopeka Quality config entry from unsupported version %s",
             entry.version,
         )
         return False
 
     if entry.version == 1:
+        from .const import CONF_REQUIRED_QUALITY, DEFAULT_REQUIRED_QUALITY
+
         new_data = {
             **entry.data,
             CONF_REQUIRED_QUALITY: entry.data.get(

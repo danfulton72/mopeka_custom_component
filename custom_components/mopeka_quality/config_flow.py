@@ -1,4 +1,4 @@
-"""Config flow for the Mopeka custom integration."""
+"""Config flow for the Mopeka Quality custom integration."""
 
 # Adapted from Home Assistant Core; modified for HACS and quality filtering.
 
@@ -9,10 +9,7 @@ from mopeka_iot_ble import MopekaIOTBluetoothDeviceData as DeviceData
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.components.bluetooth import (
-    BluetoothServiceInfoBleak,
-    async_discovered_service_info,
-)
+from homeassistant.components.bluetooth import BluetoothServiceInfoBleak, async_discovered_service_info
 from homeassistant.config_entries import ConfigFlow, ConfigFlowResult
 from homeassistant.const import CONF_ADDRESS
 from homeassistant.core import callback
@@ -34,9 +31,7 @@ def format_medium_type(medium_type: Enum) -> str:
     return medium_type.name.replace("_", " ").title()
 
 
-MEDIUM_TYPES_BY_NAME = {
-    medium.value: format_medium_type(medium) for medium in MediumType
-}
+MEDIUM_TYPES_BY_NAME = {medium.value: format_medium_type(medium) for medium in MediumType}
 
 
 def async_generate_schema(
@@ -51,11 +46,7 @@ def async_generate_schema(
             ): vol.In(MEDIUM_TYPES_BY_NAME),
             vol.Required(
                 CONF_REQUIRED_QUALITY,
-                default=(
-                    DEFAULT_REQUIRED_QUALITY
-                    if required_quality is None
-                    else required_quality
-                ),
+                default=(DEFAULT_REQUIRED_QUALITY if required_quality is None else required_quality),
             ): vol.All(
                 vol.Coerce(int),
                 vol.Range(min=MIN_REQUIRED_QUALITY, max=MAX_REQUIRED_QUALITY),
@@ -65,7 +56,7 @@ def async_generate_schema(
 
 
 class MopekaConfigFlow(ConfigFlow, domain=DOMAIN):
-    """Handle a config flow for Mopeka."""
+    """Handle a config flow for Mopeka Quality."""
 
     VERSION = 2
 
@@ -78,16 +69,12 @@ class MopekaConfigFlow(ConfigFlow, domain=DOMAIN):
     @callback
     @staticmethod
     @override
-    def async_get_options_flow(
-        config_entry: config_entries.ConfigEntry,
-    ) -> "MopekaOptionsFlow":
+    def async_get_options_flow(config_entry: config_entries.ConfigEntry) -> "MopekaOptionsFlow":
         """Return the options flow for this handler."""
         return MopekaOptionsFlow()
 
     @override
-    async def async_step_bluetooth(
-        self, discovery_info: BluetoothServiceInfoBleak
-    ) -> ConfigFlowResult:
+    async def async_step_bluetooth(self, discovery_info: BluetoothServiceInfoBleak) -> ConfigFlowResult:
         """Handle the Bluetooth discovery step."""
         await self.async_set_unique_id(discovery_info.address)
         self._abort_if_unique_id_configured()
@@ -98,17 +85,13 @@ class MopekaConfigFlow(ConfigFlow, domain=DOMAIN):
         self._discovered_device = device
         return await self.async_step_bluetooth_confirm()
 
-    async def async_step_bluetooth_confirm(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_bluetooth_confirm(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Confirm discovery and select settings."""
         assert self._discovered_device is not None
         assert self._discovery_info is not None
-
         device = self._discovered_device
         discovery_info = self._discovery_info
         title = device.title or device.get_device_name() or discovery_info.name
-
         if user_input is not None:
             self._discovered_devices[discovery_info.address] = title
             return self.async_create_entry(
@@ -118,7 +101,6 @@ class MopekaConfigFlow(ConfigFlow, domain=DOMAIN):
                     CONF_REQUIRED_QUALITY: user_input[CONF_REQUIRED_QUALITY],
                 },
             )
-
         self._set_confirm_only()
         placeholders = {"name": title}
         self.context["title_placeholders"] = placeholders
@@ -129,9 +111,7 @@ class MopekaConfigFlow(ConfigFlow, domain=DOMAIN):
         )
 
     @override
-    async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_user(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Handle manual setup from discovered devices."""
         if user_input is not None:
             address = user_input[CONF_ADDRESS]
@@ -144,7 +124,6 @@ class MopekaConfigFlow(ConfigFlow, domain=DOMAIN):
                     CONF_REQUIRED_QUALITY: user_input[CONF_REQUIRED_QUALITY],
                 },
             )
-
         current_addresses = self._async_current_ids(include_ignore=False)
         for discovery_info in async_discovered_service_info(self.hass, False):
             address = discovery_info.address
@@ -152,13 +131,9 @@ class MopekaConfigFlow(ConfigFlow, domain=DOMAIN):
                 continue
             device = DeviceData()
             if device.supported(discovery_info):
-                self._discovered_devices[address] = (
-                    device.title or device.get_device_name() or discovery_info.name
-                )
-
+                self._discovered_devices[address] = device.title or device.get_device_name() or discovery_info.name
         if not self._discovered_devices:
             return self.async_abort(reason="no_devices_found")
-
         return self.async_show_form(
             step_id="user",
             data_schema=vol.Schema(
@@ -171,15 +146,12 @@ class MopekaConfigFlow(ConfigFlow, domain=DOMAIN):
 
 
 class MopekaOptionsFlow(config_entries.OptionsFlow):
-    """Handle options for the Mopeka component."""
+    """Handle options for the Mopeka Quality component."""
 
-    async def async_step_init(
-        self, user_input: dict[str, Any] | None = None
-    ) -> ConfigFlowResult:
+    async def async_step_init(self, user_input: dict[str, Any] | None = None) -> ConfigFlowResult:
         """Handle options flow."""
         if user_input is not None:
             return self.async_create_entry(title="", data=user_input)
-
         return self.async_show_form(
             step_id="init",
             data_schema=async_generate_schema(
@@ -189,9 +161,7 @@ class MopekaOptionsFlow(config_entries.OptionsFlow):
                 ),
                 self.config_entry.options.get(
                     CONF_REQUIRED_QUALITY,
-                    self.config_entry.data.get(
-                        CONF_REQUIRED_QUALITY, DEFAULT_REQUIRED_QUALITY
-                    ),
+                    self.config_entry.data.get(CONF_REQUIRED_QUALITY, DEFAULT_REQUIRED_QUALITY),
                 ),
             ),
         )

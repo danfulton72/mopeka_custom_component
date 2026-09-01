@@ -25,7 +25,7 @@
       "init": {
         "data": {"medium_type": "Medium type", "required_quality": "Required quality %"},
         "data_description": {"required_quality": "Measurements are accepted only when reading quality is at least this percentage."},
-        "title": "Configure Mopeka"
+        "title": "Configure Mopeka Quality Filter"
       }
     }
   }

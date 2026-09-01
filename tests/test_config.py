@@ -1,18 +1,24 @@
-"""Tests for Mopeka configuration and migration."""
+"""Tests for Mopeka Quality configuration and migration."""
 
 from types import SimpleNamespace
 from unittest.mock import MagicMock
 
 import voluptuous as vol
 
-from custom_components.mopeka import async_migrate_entry
-from custom_components.mopeka.config_flow import async_generate_schema
-from custom_components.mopeka.const import (
+from custom_components.mopeka_quality import async_migrate_entry
+from custom_components.mopeka_quality.config_flow import async_generate_schema
+from custom_components.mopeka_quality.const import (
     CONF_MEDIUM_TYPE,
     CONF_REQUIRED_QUALITY,
     DEFAULT_MEDIUM_TYPE,
     DEFAULT_REQUIRED_QUALITY,
+    DOMAIN,
 )
+
+
+def test_domain() -> None:
+    """Test the custom integration uses its own domain."""
+    assert DOMAIN == "mopeka_quality"
 
 
 def test_schema_defaults() -> None:
@@ -42,7 +48,7 @@ def test_schema_rejects_out_of_range_quality() -> None:
 
 
 async def test_migrate_entry_adds_required_quality() -> None:
-    """Test migration from the Core version-one config entry."""
+    """Test migration from a version-one config entry."""
     hass = MagicMock()
     entry = SimpleNamespace(version=1, data={CONF_MEDIUM_TYPE: DEFAULT_MEDIUM_TYPE})
 
