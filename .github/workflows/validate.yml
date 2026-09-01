@@ -40,3 +40,7 @@ jobs:
       - uses: hacs/action@main
         with:
           category: integration
+          # This intentionally overrides a Core integration and is distributed
+          # as a custom repository. These are default-listing/repository-metadata
+          # checks rather than installability checks.
+          ignore: "topics description brands"
