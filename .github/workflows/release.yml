@@ -1,0 +1,72 @@
+name: Release on merge
+
+on:
+  pull_request:
+    types:
+      - closed
+    branches:
+      - main
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.pull_request.merged == true
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Determine next version from latest GitHub release
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          latest="$(gh api "repos/${GITHUB_REPOSITORY}/releases/latest" --jq .tag_name 2>/dev/null || true)"
+          if [ -z "$latest" ]; then
+            latest="0.0.0"
+          fi
+          version="$(python scripts/release_version.py --latest-tag "$latest")"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+      - name: Commit manifest version
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add custom_components/mopeka/manifest.json
+          if git diff --cached --quiet; then
+            echo "Manifest is already synchronized with ${VERSION}"
+          else
+            git commit -m "chore(release): ${VERSION} [skip ci]"
+            git push origin HEAD:main
+          fi
+
+      - name: Tag release commit
+        env:
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          git tag -a "$VERSION" -m "$VERSION"
+          git push origin "$VERSION"
+
+      - name: Create GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          gh release create "$VERSION" \
+            --title "$VERSION" \
+            --generate-notes \
+            --verify-tag
